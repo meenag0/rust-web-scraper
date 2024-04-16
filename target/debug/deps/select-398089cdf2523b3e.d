@@ -1,0 +1,9 @@
+/Users/meenakshigopalakrishnan/web-scrape/scrape/target/debug/deps/libselect-398089cdf2523b3e.rmeta: /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/lib.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/document.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/node.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/predicate.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/selection.rs
+
+/Users/meenakshigopalakrishnan/web-scrape/scrape/target/debug/deps/select-398089cdf2523b3e.d: /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/lib.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/document.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/node.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/predicate.rs /Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/selection.rs
+
+/Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/lib.rs:
+/Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/document.rs:
+/Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/node.rs:
+/Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/predicate.rs:
+/Users/meenakshigopalakrishnan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/select-0.5.0/src/selection.rs:
