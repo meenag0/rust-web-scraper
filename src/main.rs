@@ -13,18 +13,29 @@ fn main() {
     // Parse the HTML document
     let html_doc = Html::parse_document(&response);
 
-    // CSS selectors for specific elements
+    // CSS selectors for elements
     let article_tag_selector = Selector::parse(".card__kicker a").unwrap();
     let article_title_selector = Selector::parse(".card__title").unwrap();
     let author_name_selector = Selector::parse(".byline__author").unwrap();
 
     // Extract data using the selectors
-    let article_tag = html_doc.select(&article_tag_selector).next().unwrap().text().collect::<String>();
-    let article_title = html_doc.select(&article_title_selector).next().unwrap().text().collect::<String>();
-    let author_name = html_doc.select(&author_name_selector).next().unwrap().text().collect::<String>();
+    let article_tags: Vec<String> = html_doc
+        .select(&article_tag_selector)
+        .map(|element| element.text().collect::<String>())
+        .collect();
+
+    let article_titles: Vec<String> = html_doc
+        .select(&article_title_selector)
+        .map(|element| element.text().collect::<String>())
+        .collect();
+
+    let author_names: Vec<String> = html_doc
+        .select(&author_name_selector)
+        .map(|element| element.text().collect::<String>())
+        .collect();
 
     // Print the extracted data
-    println!("Article Tag: {}", article_tag);
-    println!("Article Title: {}", article_title);
-    println!("Author Name: {}", author_name);
+    println!("Article Tags: {:?}", article_tags);
+    println!("Article Titles: {:?}", article_titles);
+    println!("Author Names: {:?}", author_names);
 }
