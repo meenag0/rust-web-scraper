@@ -1,17 +1,31 @@
-use reqwest::blocking::get;
 use scraper::{Html, Selector};
-use pretty::RcDoc;
-use std::error::Error;
+use serde::{Serialize, Deserialize};
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_rt::System;
+use actix_cors::Cors;
 
-// Function to retrieve HTML content from a given URL
-fn retrieve_html(url: &str) -> String {
-    let response = get(url).unwrap().text().unwrap();
-    response
+#[derive(Serialize)]
+struct Article {
+    title: String,
+    author: String,
 }
 
-fn scrape_quanta_magazine() {
+#[derive(Serialize)]
+struct ArticleResponse {
+    title: String,
+    author: String,
+    
+}
+
+// Function to retrieve HTML content from a given URL
+async fn retrieve_html(url: &str) -> Result<String, reqwest::Error> {
+    let response = reqwest::get(url).await?.text().await?;
+    Ok(response)
+}
+
+async fn scrape_quanta_magazine() -> (Vec<String>, Vec<String>) {
     let url = "https://www.quantamagazine.org/computer-science/";
-    let response = retrieve_html(url);
+    let response = retrieve_html(url).await.expect("Failed to retrieve HTML");
 
     // Parse the HTML document
     let html_doc = Html::parse_document(&response);
@@ -42,12 +56,53 @@ fn scrape_quanta_magazine() {
         println!("Title: {}", title);
         println!("Author: {}\n", author);
     }
+    let mut titles = Vec::new();
+    let mut authors = Vec::new();
+
+    for ((title, tag), author) in article_titles.iter().zip(article_tags.iter()).zip(author_names.iter()) {
+        titles.push(title.clone());
+        authors.push(author.clone());
+    }
+
+    (titles, authors)
 }
 
-fn scrape_wired() {
+async fn scrape_tds() -> (Vec<String>, Vec<String>) {
+    let url = "https://towardsdatascience.com/";
+    let response = retrieve_html(url).await.expect("Failed to retrieve HTML");
+    let html_doc = Html::parse_document(&response);
+
+    let div_selector = Selector::parse(".col.u-xs-size12of12.js-trackPostPresentation.u-paddingLeft12").unwrap();
+
+    let mut titles = Vec::new();
+    let mut authors = Vec::new();
+
+    // Find all elements matching the div selector
+    for div in html_doc.select(&div_selector) {
+        // Extract the title
+        let title_selector = Selector::parse("h3").unwrap();
+        if let Some(title_element) = div.select(&title_selector).next() {
+            let title = title_element.text().collect::<String>().trim().to_owned();
+            titles.push(title);
+        }
+
+        // Extract the author
+        let author_selector = Selector::parse(".postMetaInline-authorLockup a").unwrap();
+        if let Some(author_element) = div.select(&author_selector).next() {
+            let author = author_element.text().collect::<String>().trim().to_owned();
+            authors.push(author);
+        }
+    }
+
+    (titles, authors)
+
+}
+
+
+async fn scrape_wired() -> (Vec<String>, Vec<String>) {
 
     let url = "https://www.wired.com/category/science/";
-    let response = retrieve_html(url);
+    let response = retrieve_html(url).await.expect("Failed to retrieve HTML");
 
     let html_doc = Html::parse_document(&response);
     let article_title_selector = Selector::parse(".SummaryItemHedBase-hiFYpQ").unwrap();
@@ -57,16 +112,19 @@ fn scrape_wired() {
     let article_titles: Vec<String> = html_doc
         .select(&article_title_selector)
         .map(|element| element.text().collect::<String>())
+        .take(5)
         .collect();
 
     let article_tags: Vec<String> = html_doc
         .select(&article_tag_selector)
         .map(|element| element.text().collect::<String>())
+        .take(5)
         .collect();
 
     let author_names: Vec<String> = html_doc
         .select(&author_name_selector)
         .map(|element| element.text().collect::<String>())
+        .take(5)
         .collect();
 
     println!("Articles:");
@@ -74,57 +132,35 @@ fn scrape_wired() {
         println!("Title: {}", title);
         println!("Author: {}\n", author);
     }
-}
+        let mut titles = Vec::new();
+        let mut authors = Vec::new();
 
-fn scrape_tds() {
-    let url = "https://towardsdatascience.com/";
-    let response = retrieve_html(url);
-    let html_doc = Html::parse_document(&response);
+        for ((title, tag), author) in article_titles.iter().zip(article_tags.iter()).zip(author_names.iter()) {
+            titles.push(title.clone());
+            authors.push(author.clone());
+        }
 
-    let div_selector = Selector::parse(".col.u-xs-size12of12.js-trackPostPresentation.u-paddingLeft12").unwrap();
-
-    // Find all elements matching the div selector
-    for div in html_doc.select(&div_selector) {
-        // Extract the title
-        let title_selector = Selector::parse("h3").unwrap();
-        let title_element = div.select(&title_selector).next().unwrap();
-        let title = title_element.text().collect::<String>().trim().to_owned();
-
-        // Extract the author
-        let author_selector = Selector::parse(".postMetaInline-authorLockup a").unwrap();
-        let author_element = div.select(&author_selector).next().unwrap();
-        let author = author_element.text().collect::<String>().trim().to_owned();
-
-        println!("Title: {}", title);
-        println!("Author: {}", author);
-        println!();
-    }
+        (titles, authors)
 }
 
 
-fn scrape_sa() {
+async fn scrape_sa() -> (Vec<String>, Vec<String>) {
     let url = "https://www.scientificamerican.com/";
-    let response = retrieve_html(url);
+    let response = retrieve_html(url).await.expect("Failed to retrieve HTML");
     let html_doc = Html::parse_document(&response);
     let div_selector = Selector::parse("div.articleList-R10iq.root-fREBs").unwrap();
-
-    // let div_elements = html_doc.select(&div_selector);
-
-    // for div_element in div_elements {
-    //     // Extract the inner HTML content of the <div> element
-    //     let inner_html = div_element.inner_html();
-
-    //     println!("{}", inner_html);
-    // }
 
     let title_selector = Selector::parse("h2.articleTitle-mtY5p").unwrap();
     let author_selector = Selector::parse("p.authors-NCGt1").unwrap();
 
     // Find all elements matching the title selector
-    let titles = html_doc.select(&title_selector);
-    let authors = html_doc.select(&author_selector);
+    let titles = html_doc.select(&title_selector).take(5);
+    let authors = html_doc.select(&author_selector).take(5);
 
-    // Process each article and print title and author
+    let mut scraped_titles = Vec::new();
+    let mut scraped_authors = Vec::new();
+    
+    // Process each article and collect title and author
     for (title, author) in titles.zip(authors) {
         let title_text = title.text().collect::<String>();
         let author_text = author.text().collect::<String>();
@@ -132,13 +168,93 @@ fn scrape_sa() {
         println!("Title: {}", title_text);
         println!("Author: {}", author_text);
         println!();
+
+        scraped_titles.push(title_text);
+        scraped_authors.push(author_text);
     }
+
+    (scraped_titles, scraped_authors)
 }
 
 
-fn main() {
-    scrape_quanta_magazine();
-    scrape_wired();
-    scrape_tds();
-    scrape_sa();
+
+fn main() -> std::io::Result<()> {
+    System::new().block_on(async {
+        let server = HttpServer::new(|| {
+            App::new()
+                .wrap(
+                    Cors::default() // Allow CORS with default settings
+                        .allow_any_origin() // Allow requests from any origin
+                        .allowed_methods(vec!["GET", "POST"]) // Allow only GET and POST methods
+                        .max_age(3600) // Cache preflight options for 3600 seconds (1 hour)
+                )
+                .route("/articles", web::get().to(get_articles_handler))
+        })
+        .bind("127.0.0.1:8080")?
+        .run();
+
+        server.await
+    })
+}
+
+fn extract_and_format_articles(articles: &[Article]) -> Vec<String> {
+    let mut formatted_articles: Vec<String> = Vec::new();
+    for article in articles {
+        let formatted_article = format!("{} - by {}", article.title, article.author);
+        formatted_articles.push(formatted_article);
+    }
+    formatted_articles
+}
+
+async fn get_articles_handler() -> impl Responder {
+    let quanta_data = scrape_quanta_magazine().await;
+    let tds_data = scrape_tds().await;
+    let wired_data = scrape_wired().await;
+    let sa_data = scrape_sa().await;
+
+    let articles: Vec<Article> = combine_data(quanta_data, tds_data, wired_data, sa_data);
+    let formatted_articles = extract_and_format_articles(&articles);
+
+    let article_responses: Vec<ArticleResponse> = formatted_articles.iter().map(|article| {
+        let parts: Vec<&str> = article.split(" - by ").collect();
+        ArticleResponse {
+            title: parts[0].to_string(),
+            author: parts[1].to_string(),
+        }
+    }).collect();
+
+    HttpResponse::Ok().json(article_responses)
+}
+
+
+fn combine_data(
+    quanta_data: (Vec<String>, Vec<String>),
+    tds_data: (Vec<String>, Vec<String>),
+    wired_data: (Vec<String>, Vec<String>),
+    sa_data: (Vec<String>, Vec<String>),
+) -> Vec<Article> {
+    // Combine data from different sources into a single vector
+    let mut articles = Vec::new();
+
+    // Combine data from Quanta Magazine
+    for (title, author) in quanta_data.0.into_iter().zip(quanta_data.1) {
+        articles.push(Article { title, author });
+    }
+
+    // Combine data from Towards Data Science
+    for (title, author) in tds_data.0.into_iter().zip(tds_data.1) {
+        articles.push(Article { title, author });
+    }
+
+    // Combine data from Wired
+    for (title, author) in wired_data.0.into_iter().zip(wired_data.1) {
+        articles.push(Article { title, author });
+    }
+
+    // Combine data from Scientific American
+    for (title, author) in sa_data.0.into_iter().zip(sa_data.1) {
+        articles.push(Article { title, author });
+    }
+
+    articles
 }
