@@ -4,6 +4,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use actix_rt::System;
 use actix_cors::Cors;
 use std::env;
+use actix_web_static_files::ResourceFiles;
 
 #[derive(Serialize)]
 struct Article {
@@ -177,15 +178,18 @@ async fn scrape_sa() -> (Vec<String>, Vec<String>) {
     (scraped_titles, scraped_authors)
 }
 
+include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Fetch the host and port from environment variables
     let host = env::var("HOST").expect("Host not set");
     let port = env::var("PORT").expect("Port not set");
 
-    // Start the HTTP server
-    HttpServer::new(|| {
+    // Start the HTTP server]
+    HttpServer::new(move || {
+        let generated = generate();
+
         App::new()
             .wrap(
                 Cors::default()
@@ -193,11 +197,16 @@ async fn main() -> std::io::Result<()> {
                     .allowed_methods(vec!["GET", "POST"])
                     .max_age(3600),
             )
-            .route("/", web::get().to(get_articles_handler))
-    })
+            .service(web::resource("/").route(web::get().to(get_articles_handler)))
+            .service(ResourceFiles::new("/", generated))
+            })
     .bind(format!("{}:{}", host, port))? // Bind to the specified host and port
     .run()
     .await
+}
+
+fn generated() -> &'static str {
+    include_str!(concat!(env!("OUT_DIR"), "/generated.rs"))
 }
 
 

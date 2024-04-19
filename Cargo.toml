@@ -11,11 +11,17 @@ scraper = "0.12.0"
 serde = "1.0.198"
 rocket = "0.5.0"
 serde_json = "1.0.40" 
-actix-web = "4.0.0"
 async-std = "1.8.0"
 actix-rt = "2.5.0"
 actix-cors = "0.7.0"
 hyper = "0.14"
+actix-web = "4.0"
+actix-web-static-files = "4.0"
+static-files = "0.2.1"
+
+[build-dependencies]
+static-files = "0.2.1"
+
 
 [[bin]]
 name = "scrape" 

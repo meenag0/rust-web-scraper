@@ -28,7 +28,7 @@ readingListDiv.appendChild(text);
 
 
 window.onload = function() {
-    fetch('http://localhost:8080/articles')
+    fetch('/')
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
