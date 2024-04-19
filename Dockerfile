@@ -1,12 +1,9 @@
 # Build stage
 FROM rust:bookworm AS builder
-# Use a Rust base image
 
 # Set the working directory inside the container
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y libssl-dev
-
+# Set the working directory inside the container
+WORKDIR /rws
 
 # Copy the entire source code into the container
 COPY . .
@@ -18,10 +15,10 @@ RUN cargo build --release
 FROM debian:bookworm-slim AS runner
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /rws
 
 # Copy the compiled binary from the builder stage into the final image
-COPY --from=builder /app/target/release/scrape /app/scrape
+COPY --from=builder /rws/target/release/scrape /app/scrape
 
 # Define the command to run your application
 CMD ["/app/scrape"]
