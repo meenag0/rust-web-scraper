@@ -4,7 +4,6 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use actix_rt::System;
 use actix_cors::Cors;
 use std::env;
-use actix_web_static_files::ResourceFiles;
 use actix_files::Files;
 
 #[derive(Serialize)]
@@ -200,7 +199,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(web::resource("/api").route(web::get().to(get_articles_handler)))
             // Serve frontend files from the "/static" path
-            .service(Files::new("/", "static").show_files_listing())
+            .service(Files::new("/", frontend_dir).show_files_listing())
             // Catch-all route for serving the index.html for frontend routes
             .default_service(web::get().to(index_html_handler))
             })
