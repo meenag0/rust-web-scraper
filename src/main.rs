@@ -199,7 +199,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(web::resource("/api").route(web::get().to(get_articles_handler)))
             // Serve frontend files from the "/static" path
-            .service(Files::new("/", "static").show_files_listing())
+            .service(Files::new("/", "static").index_file("index.html"))
             // Catch-all route for serving the index.html for frontend routes
             .default_service(web::get().to(index_html_handler))
             })
@@ -208,12 +208,13 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-async fn index_html_handler() -> impl Responder {
+async fn index_html_handler() -> HttpResponse {
     // Read the index.html file and return it as a response
     HttpResponse::Ok()
         .content_type("text/html")
         .body(include_str!("../static/index.html"))
 }
+
 
 fn extract_and_format_articles(articles: &[Article]) -> Vec<String> {
     let mut formatted_articles: Vec<String> = Vec::new();
