@@ -1,1 +1,1 @@
-web: ./target/release/scrape
+web: ./backend/target/release/scrape

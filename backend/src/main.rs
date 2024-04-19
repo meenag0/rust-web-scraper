@@ -101,7 +101,7 @@ async fn scrape_tds() -> (Vec<String>, Vec<String>) {
 
 async fn scrape_wired() -> (Vec<String>, Vec<String>) {
 
-    let url = "https://www.wired.com/category/science/";
+    let url: &str = "https://www.wired.com/category/science/";
     let response = retrieve_html(url).await.expect("Failed to retrieve HTML");
 
     let html_doc = Html::parse_document(&response);
@@ -183,16 +183,17 @@ fn main() -> std::io::Result<()> {
         let server = HttpServer::new(|| {
             App::new()
                 .wrap(
-                    Cors::default() // Allow CORS with default settings
-                        .allow_any_origin() // Allow requests from any origin
-                        .allowed_methods(vec!["GET", "POST"]) // Allow only GET and POST methods
-                        .max_age(3600) // Cache preflight options for 3600 seconds (1 hour)
+                    Cors::default()
+                        .allow_any_origin()
+                        .allowed_methods(vec!["GET", "POST"])
+                        .max_age(3600)
                 )
                 .route("/articles", web::get().to(get_articles_handler))
         })
-        .bind("127.0.0.1:8080")?
+        .bind(format!("127.0.0.1:{}", std::env::var("PORT").unwrap_or_else(|_| "8080".to_string())))? // Bind to the port provided by Heroku
         .run();
 
+        println!("Server running...");
         server.await
     })
 }
