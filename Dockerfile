@@ -5,6 +5,9 @@ FROM rust:bookworm AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y libssl-dev
+
+
 # Copy the entire source code into the container
 COPY . .
 
