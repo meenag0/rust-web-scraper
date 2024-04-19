@@ -3,18 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        @font-face {
+            font-family: 'NHD-Bold';
+            src: url('NeueHaasDisplay-Bold.ttf') format('truetype');
+        }
+        
+        @font-face {
+            font-family: 'NHD-Light';
+            src: url('NeueHaasDisplay-Light.ttf') format('truetype');
+        }
+        
+        @font-face {
+            font-family: 'NHD-Medium';
+            src: url('NeueHaasDisplay-Roman.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'NHD-Med';
+            src: url('NeueHaasDisplay-Mediu.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'NHD-Black';
+            src: url('NeueHaasDisplay-Black.ttf') format('truetype');
+        }
+        
+        @font-face {
+            font-family: 'NHD-XThin';
+            src: url('NeueHaasDisplay-XThin.ttf') format('truetype');
+        }
+        
+        @font-face {
+            font-family: 'NHD-Thin';
+            src: url('NeueHaasDisplay-Thin.ttf') format('truetype');
+        }
+        
+        #reading-list {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 6.5rem;
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 3.5rem;
+            font-family: "NHD-Medium";
+        }
+        
+        #articles-container {
+            flex-direction: column;    
+            display: flex;
+            /* width: 70%; */
+        }
+        
+        /* CSS styles for each individual article */
+        .article {
+            margin-bottom: 0px;
+            padding: 0.2rem;
+            margin-left: 4.5rem;
+            margin-right: 1rem;
+        }
+        
+        /* CSS styles for the article title */
+        .article h3 {
+            font-size: 1.2em;
+            margin-bottom: 1.6rem;
+            font-family: "NHD-XThin";
+            font-size: 5.5rem;
+            margin-top: 2.8rem;
+        }
+
+        .article h3::before {
+            content: "\2727"; /* FLOWER PUNCTUATION MARK */
+            margin-right: 0.2em; 
+        }
+        
+        /* CSS styles for the article author */
+        .article p {
+            margin-top: 0;
+            font-style: italic;
+            color: #666;
+            font-size: 2rem;
+        }
+    </style>
 
     <title>2Read</title>
 </head>
 <body>
-
     <div id="reading-list">
     </div>
 
     <div id="articles-container">
-      </div>
+    </div>
 
-    <script src="script.js"></script>    
+    <script>
+        // Function to get the dates for this week (Sunday to Saturday)
+        function getThisWeekDates() {
+            let today = new Date();
+            let currentDay = today.getDay();
+            let diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1); // Adjust if today is Sunday
+            let startDate = new Date(today.setDate(diff));
+            let endDate = new Date(today.setDate(startDate.getDate() + 6)); // Next Saturday
+
+            return {
+                startDate,
+                endDate
+            };
+        }
+
+        // Function to format the date as "Month Day"
+        function formatDate(date) {
+            const options = { month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Get this week's dates
+        let thisWeekDates = getThisWeekDates();
+
+        // Inserting text into the HTML
+        let readingListDiv = document.getElementById("reading-list");
+        let text = document.createTextNode("Reading List for " + formatDate(thisWeekDates.startDate) + " - " + formatDate(thisWeekDates.endDate));
+        readingListDiv.appendChild(text);
+
+        window.onload = function() {
+            fetch('/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                let container = document.getElementById('articles-container');
+                // Iterate over the data and create HTML elements for each article
+                data.forEach(article => {
+                    let articleDiv = document.createElement('div');
+                    articleDiv.className = 'article';
+                    let titleElement = document.createElement('h3');
+                    titleElement.textContent = article.title;
+                    let authorElement = document.createElement('p');
+                    authorElement.textContent = '' + article.author;
+                    articleDiv.appendChild(titleElement);
+                    articleDiv.appendChild(authorElement);
+                    container.appendChild(articleDiv);
+                });
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        };
+    </script>
 </body>
 </html>
