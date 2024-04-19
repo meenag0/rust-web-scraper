@@ -193,7 +193,7 @@ async fn main() -> std::io::Result<()> {
                     .allowed_methods(vec!["GET", "POST"])
                     .max_age(3600),
             )
-            .route("/articles", web::get().to(get_articles_handler))
+            .route("/", web::get().to(get_articles_handler))
     })
     .bind(format!("{}:{}", host, port))? // Bind to the specified host and port
     .run()
