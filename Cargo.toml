@@ -17,3 +17,6 @@ actix-rt = "2.5.0"
 actix-cors = "0.7.0"
 hyper = "0.14"
 
+[[bin]]
+name = "scrape" 
+path = "src/main.rs"
