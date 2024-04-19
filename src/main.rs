@@ -5,6 +5,7 @@ use actix_rt::System;
 use actix_cors::Cors;
 use std::env;
 use actix_web_static_files::ResourceFiles;
+use actix_files::Files;
 
 #[derive(Serialize)]
 struct Article {
@@ -178,7 +179,6 @@ async fn scrape_sa() -> (Vec<String>, Vec<String>) {
     (scraped_titles, scraped_authors)
 }
 
-include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -188,7 +188,8 @@ async fn main() -> std::io::Result<()> {
 
     // Start the HTTP server]
     HttpServer::new(move || {
-        let generated = generate();
+        let frontend_dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+
 
         App::new()
             .wrap(
@@ -197,18 +198,23 @@ async fn main() -> std::io::Result<()> {
                     .allowed_methods(vec!["GET", "POST"])
                     .max_age(3600),
             )
-            .service(web::resource("/").route(web::get().to(get_articles_handler)))
-            .service(ResourceFiles::new("/", generated))
+            .service(web::resource("/api").route(web::get().to(get_articles_handler)))
+            // Serve frontend files from the "/static" path
+            .service(Files::new("/static", frontend_dir).index_file("index.html"))
+            // Catch-all route for serving the index.html for frontend routes
+            .default_service(web::get().to(index_html_handler))
             })
     .bind(format!("{}:{}", host, port))? // Bind to the specified host and port
     .run()
     .await
 }
 
-fn generated() -> &'static str {
-    include_str!(concat!(env!("OUT_DIR"), "/generated.rs"))
+async fn index_html_handler() -> impl Responder {
+    // Read the index.html file and return it as a response
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(include_str!("../static/index.html"))
 }
-
 
 fn extract_and_format_articles(articles: &[Article]) -> Vec<String> {
     let mut formatted_articles: Vec<String> = Vec::new();
