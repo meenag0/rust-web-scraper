@@ -3,6 +3,7 @@ use serde::{Serialize, Deserialize};
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use actix_rt::System;
 use actix_cors::Cors;
+use std::env;
 
 #[derive(Serialize)]
 struct Article {
@@ -179,6 +180,12 @@ async fn scrape_sa() -> (Vec<String>, Vec<String>) {
 
 
 fn main() -> std::io::Result<()> {
+    // Get the port from the environment variable or default to 8080
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse()
+        .expect("PORT must be a number");
+
     System::new().block_on(async {
         let server = HttpServer::new(|| {
             App::new()
@@ -186,17 +193,18 @@ fn main() -> std::io::Result<()> {
                     Cors::default()
                         .allow_any_origin()
                         .allowed_methods(vec!["GET", "POST"])
-                        .max_age(3600)
+                        .max_age(3600),
                 )
                 .route("/articles", web::get().to(get_articles_handler))
         })
-        .bind(format!("127.0.0.1:{}", std::env::var("PORT").unwrap_or_else(|_| "8080".to_string())))? // Bind to the port provided by Heroku
+        .bind(("0.0.0.0", port))? // Bind to 0.0.0.0 to listen on all available interfaces
         .run();
 
-        println!("Server running...");
+        println!("Server running on port {}", port);
         server.await
     })
 }
+
 
 fn extract_and_format_articles(articles: &[Article]) -> Vec<String> {
     let mut formatted_articles: Vec<String> = Vec::new();
