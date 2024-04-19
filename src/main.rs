@@ -187,7 +187,7 @@ async fn main() -> std::io::Result<()> {
 
     // Start the HTTP server]
     HttpServer::new(move || {
-        let frontend_dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
+        // let frontend_dir = concat!(env!("CARGO_MANIFEST_DIR"), "/static");
 
 
         App::new()
@@ -199,7 +199,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(web::resource("/api").route(web::get().to(get_articles_handler)))
             // Serve frontend files from the "/static" path
-            .service(Files::new("/", frontend_dir).show_files_listing())
+            .service(Files::new("/", "static").show_files_listing())
             // Catch-all route for serving the index.html for frontend routes
             .default_service(web::get().to(index_html_handler))
             })
