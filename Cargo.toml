@@ -16,3 +16,4 @@ async-std = "1.8.0"
 actix-rt = "2.5.0"
 actix-cors = "0.7.0"
 hyper = "0.14"
+
