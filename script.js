@@ -36,33 +36,27 @@ window.onload = function() {
       return response.json();
     })
     .then(data => {
-      // Handle the JSON response data
+
       console.log(data);
       
-      // Get the container element where you want to display the articles
       let container = document.getElementById('articles-container');
       
       // Iterate over the data and create HTML elements for each article
       data.forEach(article => {
-        // Create a <div> element for the article
+
         let articleDiv = document.createElement('div');
         
-        // Set the class of the <div> element
         articleDiv.className = 'article';
         
-        // Create a <h3> element for the title
         let titleElement = document.createElement('h3');
         titleElement.textContent = article.title;
         
-        // Create a <p> element for the author
         let authorElement = document.createElement('p');
         authorElement.textContent = '' + article.author;
         
-        // Append the title and author elements to the article <div>
         articleDiv.appendChild(titleElement);
         articleDiv.appendChild(authorElement);
         
-        // Append the article <div> to the container
         container.appendChild(articleDiv);
       });
     })
