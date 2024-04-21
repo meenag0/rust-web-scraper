@@ -247,21 +247,21 @@ async fn get_articles_handler() -> impl Responder {
 
 
 fn combine_data(
-    quanta_data: (Vec<String>, Vec<String>),
     tds_data: (Vec<String>, Vec<String>),
+    quanta_data: (Vec<String>, Vec<String>),
     wired_data: (Vec<String>, Vec<String>),
     sa_data: (Vec<String>, Vec<String>),
 ) -> Vec<Article> {
     // Combine data from different sources into a single vector
     let mut articles = Vec::new();
 
-    // Combine data from Quanta Magazine
-    for (title, author) in quanta_data.0.into_iter().zip(quanta_data.1) {
+        // Combine data from Towards Data Science
+    for (title, author) in tds_data.0.into_iter().zip(tds_data.1) {
         articles.push(Article { title, author });
     }
 
-    // Combine data from Towards Data Science
-    for (title, author) in tds_data.0.into_iter().zip(tds_data.1) {
+    // Combine data from Quanta Magazine
+    for (title, author) in quanta_data.0.into_iter().zip(quanta_data.1) {
         articles.push(Article { title, author });
     }
 
