@@ -1,6 +1,6 @@
 # readthisweek
 
-**readthisweek** is a lightweight web application that displays a curated reading list for the current week. The app leverages a simple front-end design using HTML, CSS, and JavaScript to fetch and present articles dynamically.
+**readthisweek** is a lightweight web application that displays a curated reading list for the current week. The app leverages a rust backend, and front-end design using HTML, CSS, and JavaScript to fetch and present articles dynamically.
 
 ## Project Structure
 
